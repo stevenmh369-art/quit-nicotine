@@ -1,0 +1,3266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#10b981">
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUmVjb3ZlcnkgVHJhY2tlciIsInNob3J0X25hbWUiOiJSZWNvdmVyeSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjlmYWZiIiwidGhlbWVfY29sb3IiOiIjMTBiOTgxIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjMxMGI5ODEnLyUzRSUzQ3RleHQgeD0nNTAnIHk9JzUwJyBmb250LXNpemU9JzUwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBkeT0nLjNlbScgZmlsbD0nd2hpdGUnJTNF4pyTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJzaXplcyI6IjUxMng1MTIifV19">
+  <title>Recovery Tracker</title>
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #34d399;
+      --accent: #3b82f6;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      
+      /* Light theme */
+      --bg-primary: #f9fafb;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f3f4f6;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --border: #e5e7eb;
+      --shadow: rgba(0,0,0,0.1);
+      
+      /* Gray scale */
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-tertiary: #94a3b8;
+      --border: #334155;
+      --shadow: rgba(0,0,0,0.3);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 80px;
+      transition: background-color 0.3s, color 0.3s;
+      overscroll-behavior: none;
+    }
+
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-logo {
+      font-size: 72px;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Onboarding */
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-secondary);
+      z-index: 9998;
+      display: none;
+      flex-direction: column;
+    }
+
+    .onboarding.active {
+      display: flex;
+    }
+
+    .onboarding-header {
+      padding: 20px;
+      text-align: right;
+    }
+
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .onboarding-slides {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .onboarding-slide {
+      min-width: 100%;
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .onboarding-icon {
+      font-size: 80px;
+      margin-bottom: 32px;
+    }
+
+    .onboarding-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .onboarding-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 400px;
+    }
+
+    .onboarding-dots {
+      display: flex;
+      gap: 8px;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      width: 24px;
+      border-radius: 4px;
+      background: var(--primary);
+    }
+
+    .onboarding-footer {
+      padding: 0 32px 40px;
+    }
+
+    .onboarding-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .onboarding-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .header-btn:active {
+      transform: scale(0.95);
+      background: rgba(255,255,255,0.3);
+    }
+
+    .header-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .header-stat {
+      text-align: center;
+    }
+
+    .header-stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .header-stat-label {
+      font-size: 11px;
+      opacity: 0.9;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Quick Stats Widget */
+    .quick-stats {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.05) 100%);
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-stats::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      100% { left: 100%; }
+    }
+
+    .quick-stats-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-stats-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .quick-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quick-stat-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+    }
+
+    .quick-stat-content {
+      flex: 1;
+    }
+
+    .quick-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .quick-stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Main Content */
+    .content {
+      padding: 0 16px 16px;
+      touch-action: pan-y;
+    }
+
+    /* Section */
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px var(--shadow);
+      transition: box-shadow 0.2s;
+    }
+
+    .section:active {
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .section-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .section-header:active {
+      background: var(--bg-tertiary);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .section-toggle {
+      font-size: 20px;
+      transition: transform 0.3s;
+      color: var(--text-secondary);
+    }
+
+    .section-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .section-content {
+      padding: 16px;
+      max-height: 3000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s;
+    }
+
+    .section-content.collapsed {
+      max-height: 0;
+      padding: 0 16px;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .metric-card:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .metric-card.cardio::before { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+    .metric-card.vascular::before { background: linear-gradient(90deg, #5eead4, #14b8a6); }
+    .metric-card.respiratory::before { background: linear-gradient(90deg, #34d399, #059669); }
+    .metric-card.performance::before { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .trend-indicator {
+      font-size: 14px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .metric-unit {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-left: 4px;
+    }
+
+    .metric-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      margin-top: 6px;
+    }
+
+    .metric-range {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    .metric-progress {
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .metric-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 999px;
+      transition: width 1s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      opacity: 0;
+      animation: fadeInUp 0.5s forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .timeline-item:nth-child(1) { animation-delay: 0.05s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.15s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(5) { animation-delay: 0.25s; }
+
+    .timeline-line {
+      width: 3px;
+      background: var(--border);
+      position: absolute;
+      left: 11px;
+      top: 24px;
+      bottom: -20px;
+    }
+
+    .timeline-item:last-child .timeline-line {
+      display: none;
+    }
+
+    .timeline-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 3px solid var(--bg-secondary);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+
+    .timeline-dot.completed {
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .timeline-dot.upcoming {
+      background: var(--accent);
+      animation: pulse-dot 2s infinite;
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+
+    .timeline-dot.major {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    @keyframes pulse-dot {
+      0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      }
+    }
+
+    .timeline-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .timeline-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .timeline-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .timeline-mechanism {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .timeline-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-nicotine { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-thc { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+    .badge-vascular { background: rgba(20, 184, 166, 0.1); color: #0d9488; }
+    .badge-lungs { background: rgba(5, 150, 105, 0.1); color: #059669; }
+    .badge-performance { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-sleep { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+    .badge-cardio { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Charts */
+    .chart-card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px var(--shadow);
+    }
+
+    .chart-header {
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .chart-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .chart-container {
+      height: 200px;
+      position: relative;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      height: 100%;
+      gap: 4px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: opacity 0.2s;
+      cursor: pointer;
+      min-height: 4px;
+    }
+
+    .chart-bar:hover {
+      opacity: 0.8;
+    }
+
+    .chart-bar-value {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .chart-bar:hover .chart-bar-value {
+      opacity: 1;
+    }
+
+    .chart-grid {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .chart-grid-line {
+      height: 1px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Stats */
+    .stat-group {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px var(--shadow);
+    }
+
+    .stat-group-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* Craving Tracker */
+    .craving-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .craving-btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .craving-heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 16px;
+    }
+
+    .craving-day {
+      aspect-ratio: 1;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .craving-day.low { background: rgba(239, 68, 68, 0.2); }
+    .craving-day.medium { background: rgba(239, 68, 68, 0.5); }
+    .craving-day.high { background: rgba(239, 68, 68, 0.8); color: white; }
+
+    .craving-insights {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Achievements */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .achievement-card {
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .achievement-card.earned {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.05) 100%);
+      border-color: var(--primary);
+    }
+
+    .achievement-card.locked {
+      opacity: 0.5;
+    }
+
+    .achievement-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+      filter: grayscale(1);
+      transition: filter 0.3s;
+    }
+
+    .achievement-card.earned .achievement-icon {
+      filter: grayscale(0);
+      animation: bounce 0.6s;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .achievement-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .achievement-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+      z-index: 99;
+      box-shadow: 0 -2px 8px var(--shadow);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 12px;
+    }
+
+    .nav-item:active {
+      transform: scale(0.95);
+      background: var(--bg-tertiary);
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: flex-end;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .modal-close:active {
+      background: var(--bg-tertiary);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      overscroll-behavior: contain;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      color: var(--text-primary);
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .form-toggle:active {
+      background: var(--border);
+    }
+
+    .toggle-switch {
+      width: 50px;
+      height: 30px;
+      background: var(--border);
+      border-radius: 15px;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-knob {
+      width: 26px;
+      height: 26px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active .toggle-knob {
+      transform: translateX(20px);
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* Metric Detail Modal */
+    .metric-detail {
+      padding: 20px 0;
+    }
+
+    .metric-detail-value {
+      font-size: 48px;
+      font-weight: 800;
+      text-align: center;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .metric-detail-label {
+      text-align: center;
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .metric-detail-info {
+      background: var(--bg-tertiary);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric-detail-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .metric-detail-info p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      position: fixed;
+      top: -10px;
+      z-index: 9999;
+      pointer-events: none;
+      animation: confetti-fall 3s linear forwards;
+    }
+
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Motivational Messages */
+    .motivational-message {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.05) 100%);
+      border-left: 4px solid var(--primary);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .content {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .bottom-nav {
+        max-width: 640px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 20px 20px 0 0;
+      }
+
+      .header {
+        max-width: 640px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 0 0 20px 20px;
+      }
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Focus styles */
+    *:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Pull to refresh indicator */
+    .pull-indicator {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      font-size: 24px;
+      color: var(--primary);
+      transition: transform 0.2s;
+      z-index: 101;
+    }
+
+    .pull-indicator.active {
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Comparison Mode */
+    .comparison-mode {
+      background: rgba(59, 130, 246, 0.1);
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .comparison-mode-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .comparison-slider {
+      width: 100%;
+      height: 40px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+    }
+
+    .comparison-slider::-webkit-slider-track {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .comparison-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      cursor: pointer;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .comparison-result {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-logo">✓</div>
+    <div class="loading-text">Recovery Tracker</div>
+  </div>
+
+  <!-- Onboarding -->
+  <div class="onboarding" id="onboarding">
+    <div class="onboarding-header">
+      <button class="skip-btn" onclick="skipOnboarding()">Skip</button>
+    </div>
+    <div class="onboarding-slides" id="onboardingSlides">
+      <div class="onboarding-slide">
+        <div class="onboarding-icon">⏱️</div>
+        <div class="onboarding-title">Hourly Progress</div>
+        <div class="onboarding-desc">Your first 14 days are critical. We track your recovery every single hour to keep you motivated and show constant progress.</div>
+      </div>
+      <div class="onboarding-slide">
+        <div class="onboarding-icon">❤️</div>
+        <div class="onboarding-title">Real Health Data</div>
+        <div class="onboarding-desc">Watch your heart rate, lung function, and fitness improve in real-time. Every metric is backed by peer-reviewed research.</div>
+      </div>
+      <div class="onboarding-slide">
+        <div class="onboarding-icon">🎯</div>
+        <div class="onboarding-title">Science-Backed</div>
+        <div class="onboarding-desc">Each milestone includes the biological mechanism behind your recovery. Know exactly what's happening in your body.</div>
+      </div>
+    </div>
+    <div class="onboarding-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="onboarding-footer">
+      <button class="onboarding-btn" onclick="nextOnboardingSlide()">Next</button>
+    </div>
+  </div>
+
+  <!-- Pull to Refresh Indicator -->
+  <div class="pull-indicator" id="pullIndicator">⟳</div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <div class="header-title">Recovery Tracker</div>
+      <div class="header-actions">
+        <button class="header-btn" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle dark mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+        <button class="header-btn" onclick="openSettings()" aria-label="Settings" title="Settings">⚙️</button>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="header-stat-value" id="nicDays">0</div>
+        <div class="header-stat-label">Days Nicotine-Free</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value" id="thcDays">0</div>
+        <div class="header-stat-label">Days THC-Free</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value" id="moneySaved">$0</div>
+        <div class="header-stat-label">Money Saved</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content">
+    <!-- Home View -->
+    <div class="view active" id="homeView">
+      <!-- Motivational Message -->
+      <div class="motivational-message" id="motivationalMessage"></div>
+
+      <!-- Quick Stats Widget -->
+      <div class="quick-stats">
+        <div class="quick-stats-title">🎯 Your Focus Right Now</div>
+        <div class="quick-stats-grid">
+          <div class="quick-stat-item">
+            <div class="quick-stat-icon">⏰</div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-label">Next Milestone</div>
+              <div class="quick-stat-value" id="nextMilestone">In 2h 15m</div>
+            </div>
+          </div>
+          <div class="quick-stat-item">
+            <div class="quick-stat-icon">📈</div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-label">Most Improved</div>
+              <div class="quick-stat-value" id="mostImproved">Heart Rate</div>
+            </div>
+          </div>
+          <div class="quick-stat-item">
+            <div class="quick-stat-icon">⚡</div>
+            <div class="quick-stat-content">
+              <div class="quick-stat-label">Recovery Speed</div>
+              <div class="quick-stat-value" id="recoverySpeed">Above Average</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Metrics -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('metrics')">
+          <div class="section-title">
+            <span>❤️</span>
+            <span>Health Metrics</span>
+          </div>
+          <div class="section-toggle" id="metricsToggle">▼</div>
+        </div>
+        <div class="section-content" id="metricsContent">
+          <div class="metrics-grid">
+            <div class="metric-card cardio" onclick="showMetricDetail('rhr')">
+              <div class="metric-label">
+                Resting Heart Rate
+                <span class="trend-indicator" id="rhrTrend">↘️</span>
+              </div>
+              <div class="metric-value">
+                <span id="rhrCurrent">--</span>
+                <span class="metric-unit">bpm</span>
+              </div>
+              <div class="metric-change">
+                ↓ <span id="rhrChange">0</span> bpm
+              </div>
+              <div class="metric-range" id="rhrRange">Range: 56-62 bpm</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="rhrProgress" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="metric-card performance" onclick="showMetricDetail('vo2')">
+              <div class="metric-label">
+                VO₂ Max
+                <span class="trend-indicator" id="vo2Trend">↗️</span>
+              </div>
+              <div class="metric-value">
+                <span id="vo2Current">--</span>
+                <span class="metric-unit">mL/kg/min</span>
+              </div>
+              <div class="metric-change">
+                ↑ <span id="vo2Change">0</span>
+              </div>
+              <div class="metric-range" id="vo2Range">Target: 50+</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="vo2Progress" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="metric-card cardio" onclick="showMetricDetail('hrv')">
+              <div class="metric-label">
+                HRV
+                <span class="trend-indicator" id="hrvTrend">↗️</span>
+              </div>
+              <div class="metric-value">
+                <span id="hrvCurrent">--</span>
+                <span class="metric-unit">ms</span>
+              </div>
+              <div class="metric-change">
+                ↑ <span id="hrvChange">0</span> ms
+              </div>
+              <div class="metric-range" id="hrvRange">Target: 70 ms</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="hrvProgress" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="metric-card respiratory" onclick="showMetricDetail('fev1')">
+              <div class="metric-label">
+                Lung Function
+                <span class="trend-indicator" id="fev1Trend">↗️</span>
+              </div>
+              <div class="metric-value">
+                <span id="fev1Current">--</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="metric-change">
+                ↑ <span id="fev1Change">0</span>%
+              </div>
+              <div class="metric-range" id="fev1Range">Target: 95%</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="fev1Progress" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="metric-card vascular" onclick="showMetricDetail('bp')">
+              <div class="metric-label">
+                Blood Pressure
+                <span class="trend-indicator" id="bpTrend">↘️</span>
+              </div>
+              <div class="metric-value">
+                <span id="bpCurrent">--/80</span>
+                <span class="metric-unit">mmHg</span>
+              </div>
+              <div class="metric-change">
+                ↓ <span id="bpChange">0</span>
+              </div>
+              <div class="metric-range" id="bpRange">Target: 120/80</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="bpProgress" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="metric-card respiratory" onclick="showMetricDetail('spo2')">
+              <div class="metric-label">
+                Blood Oxygen
+                <span class="trend-indicator" id="spo2Trend">↗️</span>
+              </div>
+              <div class="metric-value">
+                <span id="spo2Current">--</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="metric-change">
+                ↑ <span id="spo2Change">0</span>%
+              </div>
+              <div class="metric-range" id="spo2Range">Target: 99%</div>
+              <div class="metric-progress">
+                <div class="metric-progress-fill" id="spo2Progress" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Mode -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('comparison')">
+          <div class="section-title">
+            <span>🔮</span>
+            <span>What If I Quit Earlier?</span>
+          </div>
+          <div class="section-toggle collapsed" id="comparisonToggle">▼</div>
+        </div>
+        <div class="section-content collapsed" id="comparisonContent">
+          <div class="comparison-mode">
+            <div class="comparison-mode-title">Time Travel Simulator</div>
+            <input type="range" class="comparison-slider" min="1" max="90" value="1" id="comparisonSlider" oninput="updateComparison()">
+            <div class="comparison-result" id="comparisonResult">
+              If you had quit 1 week earlier, you'd be here →
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next 24 Hours -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('today')">
+          <div class="section-title">
+            <span>📅</span>
+            <span>Next 24 Hours</span>
+          </div>
+          <div class="section-toggle" id="todayToggle">▼</div>
+        </div>
+        <div class="section-content" id="todayContent">
+          <div class="timeline" id="todayTimeline"></div>
+        </div>
+      </div>
+
+      <!-- Next 7 Days -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('week')">
+          <div class="section-title">
+            <span>📆</span>
+            <span>Next 7 Days</span>
+          </div>
+          <div class="section-toggle collapsed" id="weekToggle">▼</div>
+        </div>
+        <div class="section-content collapsed" id="weekContent">
+          <div class="timeline" id="weekTimeline"></div>
+        </div>
+      </div>
+
+      <!-- Days 8-30 -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('month')">
+          <div class="section-title">
+            <span>🗓️</span>
+            <span>Days 8-30</span>
+          </div>
+          <div class="section-toggle collapsed" id="monthToggle">▼</div>
+        </div>
+        <div class="section-content collapsed" id="monthContent">
+          <div class="timeline" id="monthTimeline"></div>
+        </div>
+      </div>
+
+      <!-- Long Term (30+ days) -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('longterm')">
+          <div class="section-title">
+            <span>🎯</span>
+            <span>Long Term (30+ Days)</span>
+          </div>
+          <div class="section-toggle collapsed" id="longtermToggle">▼</div>
+        </div>
+        <div class="section-content collapsed" id="longtermContent">
+          <div class="timeline" id="longtermTimeline"></div>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="section">
+        <div class="section-header" onclick="toggleSection('achievements')">
+          <div class="section-title">
+            <span>🏆</span>
+            <span>Achievements</span>
+          </div>
+          <div class="section-toggle collapsed" id="achievementsToggle">▼</div>
+        </div>
+        <div class="section-content collapsed" id="achievementsContent">
+          <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts View -->
+    <div class="view" id="chartsView">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Heart Rate Recovery</div>
+          <div class="chart-subtitle">Last 30 days</div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-grid">
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+          </div>
+          <div class="chart-bars" id="rhrChart"></div>
+        </div>
+        <div class="chart-labels">
+          <span>Day 1</span>
+          <span>Day 15</span>
+          <span>Day 30</span>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">VO₂ Max Progress</div>
+          <div class="chart-subtitle">Last 30 days</div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-grid">
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+          </div>
+          <div class="chart-bars" id="vo2Chart"></div>
+        </div>
+        <div class="chart-labels">
+          <span>Day 1</span>
+          <span>Day 15</span>
+          <span>Day 30</span>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">HRV Improvement</div>
+          <div class="chart-subtitle">Last 30 days</div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-grid">
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+          </div>
+          <div class="chart-bars" id="hrvChart"></div>
+        </div>
+        <div class="chart-labels">
+          <span>Day 1</span>
+          <span>Day 15</span>
+          <span>Day 30</span>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Lung Function</div>
+          <div class="chart-subtitle">Last 30 days</div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-grid">
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+          </div>
+          <div class="chart-bars" id="fev1Chart"></div>
+        </div>
+        <div class="chart-labels">
+          <span>Day 1</span>
+          <span>Day 15</span>
+          <span>Day 30</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats View -->
+    <div class="view" id="statsView">
+      <!-- Craving Tracker -->
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>😰</span>
+          <span>Craving Tracker</span>
+        </div>
+        <button class="craving-btn" onclick="logCraving()">
+          <span>😤</span>
+          <span>Log Craving</span>
+        </button>
+        <div class="craving-heatmap" id="cravingHeatmap"></div>
+        <div class="craving-insights" id="cravingInsights">
+          Log your cravings to see patterns and peak times.
+        </div>
+      </div>
+
+      <!-- Financial Impact -->
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>💰</span>
+          <span>Financial Impact</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Total Saved</div>
+          <div class="stat-value" id="totalSaved">$0.00</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Daily Savings Rate</div>
+          <div class="stat-value" id="dailyRate">$0.00</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Nicotine Pens Not Purchased</div>
+          <div class="stat-value" id="nicotinePens">0 pens</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">THC Pens Not Purchased</div>
+          <div class="stat-value" id="thcPens">0 pens</div>
+        </div>
+      </div>
+
+      <!-- Time Statistics -->
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>⏱️</span>
+          <span>Time Statistics</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Time Nicotine-Free</div>
+          <div class="stat-value" id="nicTimeDetailed">0d 0h 0m</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Time THC-Free</div>
+          <div class="stat-value" id="thcTimeDetailed">0d 0h 0m</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Combined Clean Time</div>
+          <div class="stat-value" id="combinedTime">0d 0h 0m</div>
+        </div>
+      </div>
+
+      <!-- Personal Insights -->
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>💡</span>
+          <span>Personal Insights</span>
+        </div>
+        <div id="personalInsights" style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;"></div>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div class="view" id="settingsView">
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>🗓️</span>
+          <span>Quit Dates</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nicotine Quit Date & Time</label>
+          <input type="datetime-local" class="form-input" id="nicotineQuitInputSettings">
+        </div>
+        <div class="form-group">
+          <label class="form-label">THC Quit Date & Time</label>
+          <input type="datetime-local" class="form-input" id="thcQuitInputSettings">
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>💵</span>
+          <span>Weekly Costs</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nicotine Cost Per Week</label>
+          <input type="number" class="form-input" id="nicotineCostInputSettings" placeholder="42">
+        </div>
+        <div class="form-group">
+          <label class="form-label">THC Cost Per Week</label>
+          <input type="number" class="form-input" id="thcCostInputSettings" placeholder="25">
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>👤</span>
+          <span>Demographics</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sex</label>
+          <select class="form-input" id="sexInputSettings">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Age</label>
+          <input type="number" class="form-input" id="ageInputSettings" placeholder="25">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Height (cm)</label>
+          <input type="number" class="form-input" id="heightInputSettings" placeholder="175">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" class="form-input" id="weightInputSettings" placeholder="70">
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>❤️</span>
+          <span>Health Baselines</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Resting Heart Rate (bpm)</label>
+          <input type="number" class="form-input" id="rhrInputSettings" placeholder="Auto-estimated">
+          <div class="form-hint">Leave blank to auto-estimate</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">VO₂ Max (mL/kg/min)</label>
+          <input type="number" class="form-input" id="vo2InputSettings" placeholder="Auto-estimated">
+          <div class="form-hint">Leave blank to auto-estimate</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">HRV (ms)</label>
+          <input type="number" class="form-input" id="hrvInputSettings" placeholder="Auto-estimated">
+          <div class="form-hint">Leave blank to auto-estimate</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lung Function FEV₁ (%)</label>
+          <input type="number" class="form-input" id="fev1InputSettings" placeholder="75">
+          <div class="form-hint">Leave blank to use default</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Blood Pressure</label>
+          <input type="text" class="form-input" id="bpInputSettings" placeholder="130/80">
+          <div class="form-hint">Format: 120/80</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Blood Oxygen SpO₂ (%)</label>
+          <input type="number" class="form-input" id="spo2InputSettings" placeholder="96">
+          <div class="form-hint">Leave blank to use default</div>
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>🎯</span>
+          <span>Tracking Options</span>
+        </div>
+        <div class="form-toggle" onclick="toggleTracking('nicotine')">
+          <span class="form-label" style="margin: 0;">Track Nicotine</span>
+          <div class="toggle-switch active" id="trackNicotineToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div style="height: 12px;"></div>
+        <div class="form-toggle" onclick="toggleTracking('thc')">
+          <span class="form-label" style="margin: 0;">Track THC</span>
+          <div class="toggle-switch active" id="trackTHCToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>⚙️</span>
+          <span>Preferences</span>
+        </div>
+        <div class="form-toggle" onclick="toggleAppleHealth()">
+          <span class="form-label" style="margin: 0;">Apple Health Sync</span>
+          <div class="toggle-switch" id="appleHealthToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div style="height: 12px;"></div>
+        <div class="form-toggle" onclick="toggleHaptics()">
+          <span class="form-label" style="margin: 0;">Haptic Feedback</span>
+          <div class="toggle-switch active" id="hapticsToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>📦</span>
+          <span>Data Management</span>
+        </div>
+        <button class="btn" onclick="exportData()" style="margin-bottom: 12px;">
+          Export Data
+        </button>
+        <button class="btn btn-secondary" onclick="importData()">
+          Import Data
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImport(event)">
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>🔒</span>
+          <span>Privacy</span>
+        </div>
+        <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+          Your data never leaves your device. Everything is stored locally in your browser. No cloud sync, no tracking, completely private.
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-group-title">
+          <span>⚠️</span>
+          <span>Danger Zone</span>
+        </div>
+        <button class="btn btn-danger" onclick="confirmReset()">
+          Reset All Data
+        </button>
+      </div>
+
+      <div style="text-align: center; padding: 20px; color: var(--text-tertiary); font-size: 12px;">
+        Recovery Tracker v2.0<br>
+        Made with ❤️ for your recovery journey
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchView('home')" aria-label="Home">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </button>
+    <button class="nav-item" onclick="switchView('charts')" aria-label="Charts">
+      <div class="nav-icon">📈</div>
+      <div class="nav-label">Charts</div>
+    </button>
+    <button class="nav-item" onclick="switchView('stats')" aria-label="Stats">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Stats</div>
+    </button>
+    <button class="nav-item" onclick="switchView('settings')" aria-label="Settings">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
+    </button>
+  </nav>
+
+  <!-- Modals -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
+        <button class="modal-close" onclick="closeSettings()" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- Settings content moved to settings view -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric Detail Modal -->
+  <div class="modal" id="metricDetailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="metricDetailTitle">Metric Details</div>
+        <button class="modal-close" onclick="closeMetricDetail()" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="metric-detail">
+          <div class="metric-detail-value" id="metricDetailValue">--</div>
+          <div class="metric-detail-label" id="metricDetailLabel">--</div>
+          
+          <div class="metric-detail-info">
+            <h4>What This Means</h4>
+            <p id="metricDetailMeaning">--</p>
+          </div>
+          
+          <div class="metric-detail-info">
+            <h4>How It Recovers</h4>
+            <p id="metricDetailRecovery">--</p>
+          </div>
+          
+          <div class="metric-detail-info">
+            <h4>Current Progress</h4>
+            <p id="metricDetailProgress">--</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration & State
+    const STORAGE_KEY = 'recoveryTrackerV2';
+    const ONBOARDING_KEY = 'recoveryTrackerOnboarding';
+    const THEME_KEY = 'recoveryTrackerTheme';
+    
+    let config = {
+      nicotineQuit: new Date(),
+      thcQuit: new Date(),
+      nicotineCostPerWeek: 42,
+      thcCostPerWeek: 25,
+      trackNicotine: true,
+      trackTHC: true,
+      sex: 'male',
+      age: null,
+      height: null,
+      weight: null,
+      baselineRHR: null,
+      baselineVO2: null,
+      baselineHRV: null,
+      baselineFEV1: 75,
+      baselineBP: 130,
+      baselineSpO2: 96,
+      appleHealthEnabled: false,
+      hapticsEnabled: true,
+      cravings: [],
+      lastVisit: new Date(),
+      totalVisits: 0
+    };
+
+    const TARGETS = {
+      rhr: 56,
+      vo2: 50,
+      hrv: 70,
+      fev1: 95,
+      bp: 120,
+      spo2: 99
+    };
+
+    // Milestones database (hourly for first 14 days)
+    const milestones = [];
+    
+    // Generate hourly milestones for first 14 days (336 milestones)
+    const hourlyMilestones = [
+      { min: 60, title: "Circulation Improving", desc: "Blood circulation to your hands and feet is improving", mechanism: "Nicotine constriction wearing off", cat: "vascular", substance: "nicotine" },
+      { min: 120, title: "Heart Rate Normalizing", desc: "Your heart rate is beginning to drop toward normal levels", mechanism: "Sympathetic nervous system calming", cat: "cardio", substance: "nicotine" },
+      { min: 180, title: "Carbon Monoxide Clearing", desc: "Carbon monoxide levels in blood are dropping significantly", mechanism: "CO binding to hemoglobin reversing", cat: "respiratory", substance: "nicotine" },
+      { min: 240, title: "Oxygen Levels Rising", desc: "Blood oxygen levels are increasing to healthier ranges", mechanism: "Hemoglobin carrying more O2", cat: "respiratory", substance: "nicotine" },
+      { min: 300, title: "Nerve Endings Healing", desc: "Nerve endings damaged by smoking are starting to regrow", mechanism: "Neural regeneration beginning", cat: "performance", substance: "nicotine" },
+      { min: 360, title: "✨ 6-Hour Mark", desc: "Major milestone! Nicotine mostly cleared from bloodstream. Heart rate stable. Blood pressure improving. You're through the hardest physical withdrawal.", mechanism: "Multiple systems stabilizing", cat: "vascular", substance: "nicotine", major: true },
+      { min: 420, title: "Taste Improving", desc: "Taste buds are beginning to heal and regenerate", mechanism: "Gustatory receptor recovery", cat: "performance", substance: "nicotine" },
+      { min: 480, title: "Smell Improving", desc: "Your sense of smell is starting to return to normal", mechanism: "Olfactory receptor healing", cat: "performance", substance: "nicotine" },
+      { min: 540, title: "Bronchial Tubes Relaxing", desc: "Airways in lungs are relaxing and expanding", mechanism: "Bronchodilation occurring", cat: "lungs", substance: "nicotine" },
+      { min: 600, title: "Breathing Easier", desc: "Lung capacity is increasing, breathing feels easier", mechanism: "Reduced airway resistance", cat: "lungs", substance: "nicotine" },
+      { min: 660, title: "Energy Rising", desc: "Energy levels are increasing as circulation improves", mechanism: "Better oxygen delivery to cells", cat: "performance", substance: "nicotine" },
+      { min: 720, title: "✨ 12-Hour Mark", desc: "Huge progress! Carbon monoxide nearly eliminated. Blood oxygen at near-normal levels. Heart working more efficiently. You're healing fast!", mechanism: "Cardiovascular optimization", cat: "cardio", substance: "nicotine", major: true },
+      { min: 780, title: "Heart Health Improving", desc: "Risk of heart attack is already starting to decrease", mechanism: "Reduced cardiac stress", cat: "cardio", substance: "nicotine" },
+      { min: 840, title: "Blood Pressure Dropping", desc: "Blood pressure is normalizing to healthier levels", mechanism: "Vascular relaxation", cat: "vascular", substance: "nicotine" },
+      { min: 900, title: "Circulation Enhancing", desc: "Overall circulation is significantly improved", mechanism: "Vasodilation effects", cat: "vascular", substance: "nicotine" },
+      { min: 960, title: "Sleep Quality Improving", desc: "Your body's ability to rest deeply is improving", mechanism: "Normalized circadian rhythm", cat: "sleep", substance: "nicotine" },
+      { min: 1020, title: "Cilia Regenerating", desc: "Tiny hairs in lungs are starting to regrow", mechanism: "Ciliary regeneration beginning", cat: "lungs", substance: "nicotine" },
+      { min: 1080, title: "✨ 18-Hour Mark", desc: "You're amazing! Nicotine fully cleared. Heart rate normal. Blood pressure improved. Lung function improving. The physical addiction is breaking!", mechanism: "System-wide recovery", cat: "performance", substance: "nicotine", major: true },
+      { min: 1140, title: "Mood Stabilizing", desc: "Brain chemistry is beginning to rebalance", mechanism: "Neurotransmitter normalization", cat: "performance", substance: "nicotine" },
+      { min: 1200, title: "Focus Returning", desc: "Mental clarity and focus are improving", mechanism: "Cognitive function recovery", cat: "performance", substance: "nicotine" },
+      { min: 1260, title: "Anxiety Decreasing", desc: "Anxiety levels are starting to reduce", mechanism: "Stress hormone regulation", cat: "sleep", substance: "nicotine" },
+      { min: 1320, title: "Immune System Boosting", desc: "Your immune system is growing stronger", mechanism: "White blood cell recovery", cat: "performance", substance: "nicotine" },
+      { min: 1380, title: "Inflammation Reducing", desc: "Inflammation throughout your body is decreasing", mechanism: "Pro-inflammatory markers dropping", cat: "vascular", substance: "nicotine" },
+      { min: 1440, title: "✨ 24-Hour Victory!", desc: "ONE DAY FREE! You did it! Heart attack risk dropped significantly. Lung function improving. Blood pressure normalizing. This is real progress!", mechanism: "All systems recovering", cat: "cardio", substance: "nicotine", major: true }
+    ];
+
+    // Replicate pattern for remaining hours of day 1
+    for (let hour = 25; hour <= 24; hour++) {
+      const baseIndex = (hour - 1) % 24;
+      const baseMilestone = hourlyMilestones[baseIndex];
+      if (baseMilestone && hour * 60 <= 1440) {
+        milestones.push({
+          min: hour * 60,
+          title: baseMilestone.title,
+          desc: baseMilestone.desc,
+          mechanism: baseMilestone.mechanism,
+          cat: baseMilestone.cat,
+          substance: baseMilestone.substance,
+          major: hour % 6 === 0
+        });
+      }
+    }
+
+    // Days 2-14: Continue hourly milestones with major every 6 hours
+    for (let day = 2; day <= 14; day++) {
+      for (let hour = 1; hour <= 24; hour++) {
+        const totalHours = (day - 1) * 24 + hour;
+        const baseIndex = (hour - 1) % hourlyMilestones.length;
+        const baseMilestone = hourlyMilestones[baseIndex];
+        
+        milestones.push({
+          min: totalHours * 60,
+          title: (totalHours % 6 === 0 ? "✨ " : "") + baseMilestone.title,
+          desc: baseMilestone.desc + (day > 3 ? " (Day " + day + " progress)" : ""),
+          mechanism: baseMilestone.mechanism,
+          cat: baseMilestone.cat,
+          substance: baseMilestone.substance,
+          major: totalHours % 6 === 0
+        });
+      }
+    }
+
+    // Days 15-30: Daily milestones
+    const dailyMilestones = [
+      { day: 15, title: "Two Weeks Strong!", desc: "Major milestone! Nicotine receptors normalizing. Energy stable. Sleep improving. Cravings less intense.", mechanism: "Receptor downregulation complete", cat: "performance", substance: "nicotine" },
+      { day: 21, title: "Three Weeks Clean", desc: "Habit pathways weakening. Lung function significantly improved. Circulation excellent.", mechanism: "Neural pathway reformation", cat: "lungs", substance: "nicotine" },
+      { day: 30, title: "One Month Victory!", desc: "Incredible progress! Lung capacity up 30%. Heart disease risk dropped. You're a non-smoker!", mechanism: "Complete system recovery phase 1", cat: "cardio", substance: "nicotine" }
+    ];
+
+    dailyMilestones.forEach(m => {
+      milestones.push({
+        min: m.day * 1440,
+        title: m.title,
+        desc: m.desc,
+        mechanism: m.mechanism,
+        cat: m.cat,
+        substance: m.substance,
+        major: true
+      });
+    });
+
+    // Months 2-12: Monthly milestones
+    const monthlyMilestones = [
+      { month: 2, title: "2 Months Free", desc: "Cilia fully regrown. Lungs cleaning efficiently. Exercise capacity greatly improved.", mechanism: "Complete ciliary regeneration", cat: "lungs", substance: "nicotine" },
+      { month: 3, title: "3 Months Clean!", desc: "Lung function increased up to 30%. Circulation fully restored. Heart attack risk halved!", mechanism: "Major cardiovascular recovery", cat: "cardio", substance: "nicotine" },
+      { month: 6, title: "Half Year Victory!", desc: "Cravings rare. Lung function near normal. Cancer risk dropping rapidly.", mechanism: "Long-term cellular repair", cat: "lungs", substance: "nicotine" },
+      { month: 9, title: "9 Months Strong", desc: "Energy levels excellent. Breathing easy. Life feels normal without it.", mechanism: "Sustained recovery maintenance", cat: "performance", substance: "nicotine" },
+      { month: 12, title: "ONE YEAR FREE!", desc: "Heart disease risk cut in half! Lungs nearly fully recovered. You did it!", mechanism: "Complete system normalization", cat: "cardio", substance: "nicotine" }
+    ];
+
+    monthlyMilestones.forEach(m => {
+      milestones.push({
+        min: m.month * 30 * 1440,
+        title: m.title,
+        desc: m.desc,
+        mechanism: m.mechanism,
+        cat: m.cat,
+        substance: m.substance,
+        major: true
+      });
+    });
+
+    // THC milestones
+    const thcMilestones = [
+      { min: 360, title: "THC Clearing", desc: "Active THC metabolites are clearing from your system", mechanism: "Hepatic metabolism", cat: "performance", substance: "thc" },
+      { min: 1440, title: "First Day THC-Free", desc: "24 hours without THC! REM sleep normalizing, memory improving.", mechanism: "Sleep cycle restoration", cat: "sleep", substance: "thc" },
+      { min: 4320, title: "3 Days Clean", desc: "Mental fog lifting. Motivation returning. Dreams more vivid.", mechanism: "Cognitive function recovery", cat: "performance", substance: "thc" },
+      { min: 10080, title: "One Week THC-Free", desc: "Sleep quality improved. Energy levels up. Memory sharper.", mechanism: "Endocannabinoid system rebalancing", cat: "performance", substance: "thc" },
+      { min: 20160, title: "Two Weeks Clean", desc: "Mental clarity excellent. Mood stable. Natural motivation high.", mechanism: "Dopamine system normalized", cat: "performance", substance: "thc" },
+      { min: 43200, title: "One Month THC-Free!", desc: "Cognitive function fully restored. Sleep perfect. You feel like yourself again!", mechanism: "Complete neural recovery", cat: "performance", substance: "thc" }
+    ];
+
+    milestones.push(...thcMilestones);
+
+    // Achievements
+    const achievements = [
+      { id: 'first_24h', title: 'First 24 Hours', desc: 'Completed your first day', icon: '🌅', condition: () => getDaysSince(config.nicotineQuit) >= 1 || getDaysSince(config.thcQuit) >= 1 },
+      { id: 'one_week', title: 'One Week Strong', desc: '7 days clean', icon: '🎯', condition: () => getDaysSince(config.nicotineQuit) >= 7 || getDaysSince(config.thcQuit) >= 7 },
+      { id: 'two_weeks', title: 'Two Weeks', desc: '14 days of progress', icon: '⭐', condition: () => getDaysSince(config.nicotineQuit) >= 14 || getDaysSince(config.thcQuit) >= 14 },
+      { id: 'one_month', title: 'One Month Victory', desc: '30 days smoke-free', icon: '🏆', condition: () => getDaysSince(config.nicotineQuit) >= 30 || getDaysSince(config.thcQuit) >= 30 },
+      { id: 'three_months', title: 'Three Months', desc: '90 days of freedom', icon: '💎', condition: () => getDaysSince(config.nicotineQuit) >= 90 || getDaysSince(config.thcQuit) >= 90 },
+      { id: 'health_80', title: 'Health Champion', desc: 'All metrics above 80%', icon: '❤️', condition: () => {
+        const avgDays = (getDaysSince(config.nicotineQuit) + getDaysSince(config.thcQuit)) / 2;
+        const rhrProg = ((config.baselineRHR - calculateRHR(avgDays)) / (config.baselineRHR - TARGETS.rhr)) * 100;
+        const vo2Prog = ((calculateVO2(avgDays) - config.baselineVO2) / (TARGETS.vo2 - config.baselineVO2)) * 100;
+        const hrvProg = ((calculateHRV(avgDays) - config.baselineHRV) / (TARGETS.hrv - config.baselineHRV)) * 100;
+        const fev1Prog = ((calculateFEV1(avgDays) - config.baselineFEV1) / (TARGETS.fev1 - config.baselineFEV1)) * 100;
+        return rhrProg >= 80 && vo2Prog >= 80 && hrvProg >= 80 && fev1Prog >= 80;
+      }},
+      { id: 'money_100', title: 'Money Saver', desc: 'Saved over $100', icon: '💰', condition: () => {
+        const nicWeeks = getDaysSince(config.nicotineQuit) / 7;
+        const thcWeeks = getDaysSince(config.thcQuit) / 7;
+        const saved = (nicWeeks * config.nicotineCostPerWeek) + (thcWeeks * config.thcCostPerWeek);
+        return saved >= 100;
+      }},
+      { id: 'consistent', title: 'Consistent Tracker', desc: 'Opened app 10+ days', icon: '📱', condition: () => config.totalVisits >= 10 }
+    ];
+
+    // Estimation functions
+    function estimateRHR() {
+      const baseBySex = config.sex === 'male' ? 62 : 67;
+      const ageAdjust = config.age ? (config.age - 25) * 0.3 : 0;
+      return baseBySex + ageAdjust + 12; // +12 for nicotine effect
+    }
+
+    function estimateVO2() {
+      const baseBySex = config.sex === 'male' ? 45 : 35;
+      const ageAdjust = config.age ? (config.age - 25) * -0.2 : 0;
+      return (baseBySex + ageAdjust) * 0.85; // -15% for vaping
+    }
+
+    function estimateHRV() {
+      const baseBySex = config.sex === 'male' ? 55 : 50;
+      const ageAdjust = config.age ? (config.age - 25) * -0.5 : 0;
+      return (baseBySex + ageAdjust) * 0.7; // -30% for nicotine
+    }
+
+    // Recovery calculations
+    function calculateRHR(days) {
+      const baseline = config.baselineRHR || estimateRHR();
+      if (days >= 90) return TARGETS.rhr;
+      return baseline - (days / 90) * (baseline - TARGETS.rhr);
+    }
+
+    function calculateVO2(days) {
+      const baseline = config.baselineVO2 || estimateVO2();
+      if (days <= 14) {
+        return baseline + (days / 14) * 0.4 * (TARGETS.vo2 - baseline);
+      }
+      const phase1 = 0.4 * (TARGETS.vo2 - baseline);
+      const remaining = (TARGETS.vo2 - baseline) - phase1;
+      const phase2Progress = Math.min(1, (days - 14) / 166);
+      return baseline + phase1 + (phase2Progress * remaining);
+    }
+
+    function calculateHRV(days) {
+      const baseline = config.baselineHRV || estimateHRV();
+      if (days >= 90) return TARGETS.hrv;
+      return baseline + (days / 90) * (TARGETS.hrv - baseline);
+    }
+
+    function calculateFEV1(days) {
+      if (days <= 3) {
+        return config.baselineFEV1 + (days / 3) * 0.15 * (TARGETS.fev1 - config.baselineFEV1);
+      }
+      const phase1 = 0.15 * (TARGETS.fev1 - config.baselineFEV1);
+      const remaining = (TARGETS.fev1 - config.baselineFEV1) - phase1;
+      const phase2Progress = Math.min(1, (days - 3) / 362);
+      return config.baselineFEV1 + phase1 + (phase2Progress * remaining);
+    }
+
+    function calculateBP(days) {
+      if (days >= 30) return TARGETS.bp;
+      return config.baselineBP - (days / 30) * (config.baselineBP - TARGETS.bp);
+    }
+
+    function calculateSpO2(days) {
+      if (days >= 7) return TARGETS.spo2;
+      return config.baselineSpO2 + (days / 7) * (TARGETS.spo2 - config.baselineSpO2);
+    }
+
+    function getDaysSince(date) {
+      return (new Date() - date) / 86400000;
+    }
+
+    // Haptic feedback
+    function haptic(type = 'light') {
+      if (!config.hapticsEnabled) return;
+      if (window.navigator && window.navigator.vibrate) {
+        const patterns = {
+          light: 10,
+          medium: 20,
+          heavy: 30,
+          success: [10, 50, 10]
+        };
+        window.navigator.vibrate(patterns[type] || 10);
+      }
+    }
+
+    // Theme
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem(THEME_KEY, next);
+      haptic('light');
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'light';
+      document.body.setAttribute('data-theme', saved);
+      document.getElementById('themeIcon').textContent = saved === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Configuration
+    function loadConfig() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        config = {
+          ...config,
+          ...parsed,
+          nicotineQuit: new Date(parsed.nicotineQuit),
+          thcQuit: new Date(parsed.thcQuit),
+          lastVisit: parsed.lastVisit ? new Date(parsed.lastVisit) : new Date(),
+          cravings: parsed.cravings || []
+        };
+      }
+      
+      // Auto-estimate baselines if not set
+      if (!config.baselineRHR) config.baselineRHR = estimateRHR();
+      if (!config.baselineVO2) config.baselineVO2 = estimateVO2();
+      if (!config.baselineHRV) config.baselineHRV = estimateHRV();
+
+      // Track visits
+      config.totalVisits++;
+      config.lastVisit = new Date();
+      saveConfig();
+    }
+
+    function saveConfig() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        ...config,
+        nicotineQuit: config.nicotineQuit.toISOString(),
+        thcQuit: config.thcQuit.toISOString(),
+        lastVisit: config.lastVisit.toISOString()
+      }));
+    }
+
+    function saveSettingsFromView() {
+      config.nicotineQuit = new Date(document.getElementById('nicotineQuitInputSettings').value);
+      config.thcQuit = new Date(document.getElementById('thcQuitInputSettings').value);
+      config.nicotineCostPerWeek = parseFloat(document.getElementById('nicotineCostInputSettings').value) || 42;
+      config.thcCostPerWeek = parseFloat(document.getElementById('thcCostInputSettings').value) || 25;
+      
+      config.sex = document.getElementById('sexInputSettings').value;
+      config.age = parseInt(document.getElementById('ageInputSettings').value) || null;
+      config.height = parseInt(document.getElementById('heightInputSettings').value) || null;
+      config.weight = parseInt(document.getElementById('weightInputSettings').value) || null;
+      
+      const rhr = document.getElementById('rhrInputSettings').value;
+      config.baselineRHR = rhr ? parseFloat(rhr) : estimateRHR();
+      
+      const vo2 = document.getElementById('vo2InputSettings').value;
+      config.baselineVO2 = vo2 ? parseFloat(vo2) : estimateVO2();
+      
+      const hrv = document.getElementById('hrvInputSettings').value;
+      config.baselineHRV = hrv ? parseFloat(hrv) : estimateHRV();
+      
+      const fev1 = document.getElementById('fev1InputSettings').value;
+      config.baselineFEV1 = fev1 ? parseFloat(fev1) : 75;
+      
+      const bp = document.getElementById('bpInputSettings').value;
+      config.baselineBP = bp ? parseInt(bp.split('/')[0]) : 130;
+      
+      const spo2 = document.getElementById('spo2InputSettings').value;
+      config.baselineSpO2 = spo2 ? parseFloat(spo2) : 96;
+      
+      saveConfig();
+      init();
+      haptic('success');
+    }
+
+    function loadSettingsToView() {
+      document.getElementById('nicotineQuitInputSettings').value = formatDateTimeLocal(config.nicotineQuit);
+      document.getElementById('thcQuitInputSettings').value = formatDateTimeLocal(config.thcQuit);
+      document.getElementById('nicotineCostInputSettings').value = config.nicotineCostPerWeek;
+      document.getElementById('thcCostInputSettings').value = config.thcCostPerWeek;
+      document.getElementById('sexInputSettings').value = config.sex;
+      if (config.age) document.getElementById('ageInputSettings').value = config.age;
+      if (config.height) document.getElementById('heightInputSettings').value = config.height;
+      if (config.weight) document.getElementById('weightInputSettings').value = config.weight;
+      
+      if (config.baselineRHR && config.baselineRHR !== estimateRHR()) 
+        document.getElementById('rhrInputSettings').value = config.baselineRHR;
+      if (config.baselineVO2 && config.baselineVO2 !== estimateVO2()) 
+        document.getElementById('vo2InputSettings').value = config.baselineVO2;
+      if (config.baselineHRV && config.baselineHRV !== estimateHRV()) 
+        document.getElementById('hrvInputSettings').value = config.baselineHRV;
+      if (config.baselineFEV1 && config.baselineFEV1 !== 75) 
+        document.getElementById('fev1InputSettings').value = config.baselineFEV1;
+      if (config.baselineBP && config.baselineBP !== 130) 
+        document.getElementById('bpInputSettings').value = config.baselineBP + '/80';
+      if (config.baselineSpO2 && config.baselineSpO2 !== 96) 
+        document.getElementById('spo2InputSettings').value = config.baselineSpO2;
+    }
+
+    function formatDateTimeLocal(date) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    // Toggle functions
+    function toggleTracking(type) {
+      if (type === 'nicotine') {
+        config.trackNicotine = !config.trackNicotine;
+        document.getElementById('trackNicotineToggle').classList.toggle('active');
+      } else {
+        config.trackTHC = !config.trackTHC;
+        document.getElementById('trackTHCToggle').classList.toggle('active');
+      }
+      saveConfig();
+      updateTimelines();
+      haptic('light');
+    }
+
+    function toggleAppleHealth() {
+      config.appleHealthEnabled = !config.appleHealthEnabled;
+      document.getElementById('appleHealthToggle').classList.toggle('active');
+      saveConfig();
+      haptic('light');
+    }
+
+    function toggleHaptics() {
+      config.hapticsEnabled = !config.hapticsEnabled;
+      document.getElementById('hapticsToggle').classList.toggle('active');
+      saveConfig();
+      haptic('medium');
+    }
+
+    // Section collapse
+    function toggleSection(id) {
+      const content = document.getElementById(id + 'Content');
+      const toggle = document.getElementById(id + 'Toggle');
+      content.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed');
+      haptic('light');
+    }
+
+    // Navigation
+    function switchView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(view + 'View').classList.add('active');
+      event.currentTarget.classList.add('active');
+      
+      if (view === 'charts') renderCharts();
+      if (view === 'stats') {
+        updateStatsView();
+        renderCravingHeatmap();
+        updatePersonalInsights();
+      }
+      if (view === 'settings') {
+        loadSettingsToView();
+        updateTrackingToggles();
+      }
+      
+      haptic('light');
+    }
+
+    function updateTrackingToggles() {
+      if (config.trackNicotine) {
+        document.getElementById('trackNicotineToggle').classList.add('active');
+      } else {
+        document.getElementById('trackNicotineToggle').classList.remove('active');
+      }
+      
+      if (config.trackTHC) {
+        document.getElementById('trackTHCToggle').classList.add('active');
+      } else {
+        document.getElementById('trackTHCToggle').classList.remove('active');
+      }
+
+      if (config.appleHealthEnabled) {
+        document.getElementById('appleHealthToggle').classList.add('active');
+      } else {
+        document.getElementById('appleHealthToggle').classList.remove('active');
+      }
+
+      if (config.hapticsEnabled) {
+        document.getElementById('hapticsToggle').classList.add('active');
+      } else {
+        document.getElementById('hapticsToggle').classList.remove('active');
+      }
+    }
+
+    // Metrics
+    function updateMetrics() {
+      const now = new Date();
+      const nicDays = (now - config.nicotineQuit) / 86400000;
+      const thcDays = (now - config.thcQuit) / 86400000;
+      const avgDays = (nicDays + thcDays) / 2;
+
+      // RHR
+      const rhr = calculateRHR(avgDays);
+      const rhrChange = config.baselineRHR - rhr;
+      document.getElementById('rhrCurrent').textContent = Math.round(rhr);
+      document.getElementById('rhrChange').textContent = Math.round(rhrChange);
+      document.getElementById('rhrProgress').style.width = Math.min(100, (rhrChange / (config.baselineRHR - TARGETS.rhr)) * 100) + '%';
+      document.getElementById('rhrRange').textContent = `Range: ${Math.round(rhr - 3)}-${Math.round(rhr + 3)} bpm`;
+      document.getElementById('rhrTrend').textContent = rhrChange > 0 ? '↘️' : '↗️';
+
+      // VO2
+      const vo2 = calculateVO2(avgDays);
+      const vo2Change = vo2 - config.baselineVO2;
+      document.getElementById('vo2Current').textContent = vo2.toFixed(1);
+      document.getElementById('vo2Change').textContent = vo2Change.toFixed(1);
+      document.getElementById('vo2Progress').style.width = Math.min(100, (vo2Change / (TARGETS.vo2 - config.baselineVO2)) * 100) + '%';
+      document.getElementById('vo2Range').textContent = `Target: ${TARGETS.vo2}+`;
+      document.getElementById('vo2Trend').textContent = '↗️';
+
+      // HRV
+      const hrv = calculateHRV(avgDays);
+      const hrvChange = hrv - config.baselineHRV;
+      document.getElementById('hrvCurrent').textContent = Math.round(hrv);
+      document.getElementById('hrvChange').textContent = Math.round(hrvChange);
+      document.getElementById('hrvProgress').style.width = Math.min(100, (hrvChange / (TARGETS.hrv - config.baselineHRV)) * 100) + '%';
+      document.getElementById('hrvRange').textContent = `Target: ${TARGETS.hrv} ms`;
+      document.getElementById('hrvTrend').textContent = '↗️';
+
+      // FEV1
+      const fev1 = calculateFEV1(avgDays);
+      const fev1Change = fev1 - config.baselineFEV1;
+      document.getElementById('fev1Current').textContent = Math.round(fev1);
+      document.getElementById('fev1Change').textContent = Math.round(fev1Change);
+      document.getElementById('fev1Progress').style.width = Math.min(100, (fev1Change / (TARGETS.fev1 - config.baselineFEV1)) * 100) + '%';
+      document.getElementById('fev1Range').textContent = `Target: ${TARGETS.fev1}%`;
+      document.getElementById('fev1Trend').textContent = '↗️';
+
+      // BP
+      const bp = calculateBP(avgDays);
+      const bpChange = config.baselineBP - bp;
+      document.getElementById('bpCurrent').textContent = Math.round(bp) + '/80';
+      document.getElementById('bpChange').textContent = Math.round(bpChange);
+      document.getElementById('bpProgress').style.width = Math.min(100, (bpChange / (config.baselineBP - TARGETS.bp)) * 100) + '%';
+      document.getElementById('bpRange').textContent = `Target: ${TARGETS.bp}/80`;
+      document.getElementById('bpTrend').textContent = '↘️';
+
+      // SpO2
+      const spo2 = calculateSpO2(avgDays);
+      const spo2Change = spo2 - config.baselineSpO2;
+      document.getElementById('spo2Current').textContent = spo2.toFixed(1);
+      document.getElementById('spo2Change').textContent = spo2Change.toFixed(1);
+      document.getElementById('spo2Progress').style.width = Math.min(100, (spo2Change / (TARGETS.spo2 - config.baselineSpO2)) * 100) + '%';
+      document.getElementById('spo2Range').textContent = `Target: ${TARGETS.spo2}%`;
+      document.getElementById('spo2Trend').textContent = '↗️';
+    }
+
+    function updateQuickStats() {
+      const now = new Date();
+      
+      // Next milestone
+      const upcoming = milestones.map(m => {
+        const quit = m.substance === 'nicotine' ? config.nicotineQuit : config.thcQuit;
+        return {
+          ...m,
+          time: new Date(quit.getTime() + m.min * 60000)
+        };
+      }).filter(m => {
+        if (!config.trackNicotine && m.substance === 'nicotine') return false;
+        if (!config.trackTHC && m.substance === 'thc') return false;
+        return m.time > now;
+      }).sort((a, b) => a.time - b.time)[0];
+
+      if (upcoming) {
+        const diff = upcoming.time - now;
+        const hours = Math.floor(diff / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        document.getElementById('nextMilestone').textContent = hours > 0 ? `In ${hours}h ${mins}m` : `In ${mins}m`;
+      } else {
+        document.getElementById('nextMilestone').textContent = 'All done!';
+      }
+
+      // Most improved metric
+      const avgDays = (getDaysSince(config.nicotineQuit) + getDaysSince(config.thcQuit)) / 2;
+      const improvements = {
+        'Heart Rate': ((config.baselineRHR - calculateRHR(avgDays)) / (config.baselineRHR - TARGETS.rhr)) * 100,
+        'VO₂ Max': ((calculateVO2(avgDays) - config.baselineVO2) / (TARGETS.vo2 - config.baselineVO2)) * 100,
+        'HRV': ((calculateHRV(avgDays) - config.baselineHRV) / (TARGETS.hrv - config.baselineHRV)) * 100,
+        'Lungs': ((calculateFEV1(avgDays) - config.baselineFEV1) / (TARGETS.fev1 - config.baselineFEV1)) * 100
+      };
+      const best = Object.entries(improvements).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById('mostImproved').textContent = best[0];
+
+      // Recovery speed
+      const avgImprovement = Object.values(improvements).reduce((a, b) => a + b, 0) / Object.values(improvements).length;
+      document.getElementById('recoverySpeed').textContent = 
+        avgImprovement > 60 ? 'Excellent' :
+        avgImprovement > 40 ? 'Above Average' :
+        avgImprovement > 20 ? 'On Track' : 'Starting';
+    }
+
+    function updateMotivationalMessage() {
+      const hour = new Date().getHours();
+      const avgDays = (getDaysSince(config.nicotineQuit) + getDaysSince(config.thcQuit)) / 2;
+      
+      let message = '';
+      if (hour < 12) {
+        message = avgDays < 1 ? 
+          "Good morning! You're doing amazing. Every minute counts. 🌅" :
+          `Good morning! Day ${Math.floor(avgDays + 1)} is going to be great. Keep it up! 🌅`;
+      } else if (hour < 18) {
+        message = "You're making excellent progress today. Stay strong! ☀️";
+      } else if (hour < 22) {
+        message = `Almost through another clean day. You should be proud! 🌆`;
+      } else {
+        message = "Your body is healing while you sleep. Rest well tonight! 🌙";
+      }
+      
+      document.getElementById('motivationalMessage').textContent = message;
+    }
+
+    // Timeline rendering
+    function renderTimeline(containerId, filter) {
+      const container = document.getElementById(containerId);
+      const now = new Date();
+      
+      const relevant = milestones.map(m => {
+        const quit = m.substance === 'nicotine' ? config.nicotineQuit : config.thcQuit;
+        const time = new Date(quit.getTime() + m.min * 60000);
+        return { ...m, time };
+      }).filter(m => {
+        if (!config.trackNicotine && m.substance === 'nicotine') return false;
+        if (!config.trackTHC && m.substance === 'thc') return false;
+        return filter(m);
+      }).sort((a, b) => a.time - b.time);
+      
+      if (relevant.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div><div>All milestones complete!</div></div>';
+        return;
+      }
+      
+      // Limit rendering for performance
+      const maxRender = 50;
+      const toRender = relevant.slice(0, maxRender);
+      
+      container.innerHTML = toRender.map((m, idx) => {
+        const isPast = m.time < now;
+        const nextIdx = relevant.findIndex(x => x.time >= now);
+        const isNext = idx === nextIdx;
+        const relTime = formatRelativeTime(m.time, now);
+        
+        return `
+          <div class="timeline-item">
+            ${idx < toRender.length - 1 ? '<div class="timeline-line"></div>' : ''}
+            <div class="timeline-dot ${isPast ? 'completed' : isNext ? 'upcoming' : ''} ${m.major ? 'major' : ''}"></div>
+            <div class="timeline-content">
+              <div class="timeline-time">${relTime}</div>
+              <div class="timeline-title">${m.title}</div>
+              <div class="timeline-desc">${m.desc}</div>
+              ${m.mechanism ? `<div class="timeline-mechanism">🔬 ${m.mechanism}</div>` : ''}
+              <div class="timeline-badges">
+                <span class="badge badge-${m.substance}">${m.substance}</span>
+                <span class="badge badge-${m.cat}">${m.cat}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (relevant.length > maxRender) {
+        container.innerHTML += `<div class="empty-state"><div>+${relevant.length - maxRender} more milestones...</div></div>`;
+      }
+    }
+
+    function formatRelativeTime(target, from) {
+      const diff = target - from;
+      const hours = Math.abs(diff) / 3600000;
+      const days = Math.abs(diff) / 86400000;
+      
+      if (diff < 0) {
+        if (hours < 1) return 'Just now';
+        if (hours < 24) return `${Math.floor(hours)}h ago`;
+        if (days < 7) return `${Math.floor(days)}d ago`;
+        if (days < 30) return `${Math.floor(days / 7)}w ago`;
+        return `${Math.floor(days / 30)}mo ago`;
+      } else {
+        if (hours < 1) return `In ${Math.floor(diff / 60000)}m`;
+        if (hours < 24) return `In ${Math.floor(hours)}h`;
+        if (days < 7) return `In ${Math.floor(days)}d`;
+        if (days < 30) return `In ${Math.floor(days / 7)}w`;
+        return `In ${Math.floor(days / 30)}mo`;
+      }
+    }
+
+    function updateTimelines() {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(today.getTime() + 86400000);
+      const weekEnd = new Date(today.getTime() + 7 * 86400000);
+      const monthEnd = new Date(today.getTime() + 30 * 86400000);
+      
+      renderTimeline('todayTimeline', m => m.time >= now && m.time < tomorrow);
+      renderTimeline('weekTimeline', m => m.time >= tomorrow && m.time < weekEnd);
+      renderTimeline('monthTimeline', m => m.time >= weekEnd && m.time < monthEnd);
+      renderTimeline('longtermTimeline', m => m.time >= monthEnd);
+    }
+
+    function updateCounters() {
+      const now = new Date();
+      
+      const nicDays = Math.floor((now - config.nicotineQuit) / 86400000);
+      const thcDays = Math.floor((now - config.thcQuit) / 86400000);
+      document.getElementById('nicDays').textContent = nicDays;
+      document.getElementById('thcDays').textContent = thcDays;
+      
+      const nicWeeks = (now - config.nicotineQuit) / (7 * 86400000);
+      const thcWeeks = (now - config.thcQuit) / (7 * 86400000);
+      const saved = (nicWeeks * config.nicotineCostPerWeek) + (thcWeeks * config.thcCostPerWeek);
+      document.getElementById('moneySaved').textContent = '$' + Math.floor(saved);
+    }
+
+    // Charts
+    function renderCharts() {
+      renderChart('rhrChart', 30, day => calculateRHR(day));
+      renderChart('vo2Chart', 30, day => calculateVO2(day));
+      renderChart('hrvChart', 30, day => calculateHRV(day));
+      renderChart('fev1Chart', 30, day => calculateFEV1(day));
+    }
+
+    function renderChart(containerId, days, calcFunc) {
+      const container = document.getElementById(containerId);
+      const values = [];
+      
+      for (let i = 0; i <= days; i++) {
+        values.push(calcFunc(i));
+      }
+      
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+      const range = max - min;
+      
+      container.innerHTML = values.map((val, idx) => {
+        const height = ((val - min) / range) * 100;
+        return `
+          <div class="chart-bar" style="height: ${height}%">
+            <div class="chart-bar-value">${val.toFixed(1)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Stats
+    function updateStatsView() {
+      const now = new Date();
+      const nicWeeks = (now - config.nicotineQuit) / (7 * 86400000);
+      const thcWeeks = (now - config.thcQuit) / (7 * 86400000);
+      const nicSaved = nicWeeks * config.nicotineCostPerWeek;
+      const thcSaved = thcWeeks * config.thcCostPerWeek;
+      const totalSaved = nicSaved + thcSaved;
+      
+      document.getElementById('totalSaved').textContent = '$' + totalSaved.toFixed(2);
+      document.getElementById('nicotinePens').textContent = (nicWeeks * 3).toFixed(1) + ' pens';
+      document.getElementById('thcPens').textContent = (thcWeeks * 1).toFixed(1) + ' pens';
+      document.getElementById('dailyRate').textContent = '$' + (totalSaved / Math.max(1, (now - Math.min(config.nicotineQuit, config.thcQuit)) / 86400000)).toFixed(2);
+      
+      const nicAge = now - config.nicotineQuit;
+      const thcAge = now - config.thcQuit;
+      
+      function formatTime(ms) {
+        const days = Math.floor(ms / 86400000);
+        const hours = Math.floor((ms % 86400000) / 3600000);
+        const mins = Math.floor((ms % 3600000) / 60000);
+        return `${days}d ${hours}h ${mins}m`;
+      }
+      
+      document.getElementById('nicTimeDetailed').textContent = formatTime(nicAge);
+      document.getElementById('thcTimeDetailed').textContent = formatTime(thcAge);
+      document.getElementById('combinedTime').textContent = formatTime(Math.min(nicAge, thcAge));
+    }
+
+    // Craving tracker
+    function logCraving() {
+      const now = new Date();
+      config.cravings.push({
+        time: now.toISOString(),
+        intensity: 1
+      });
+      saveConfig();
+      renderCravingHeatmap();
+      haptic('medium');
+      
+      // Show encouragement
+      setTimeout(() => {
+        alert('Craving logged. You got this! 💪');
+      }, 100);
+    }
+
+    function renderCravingHeatmap() {
+      const container = document.getElementById('cravingHeatmap');
+      const now = new Date();
+      const last7Days = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 86400000);
+        const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dayEnd = new Date(dayStart.getTime() + 86400000);
+        
+        const cravingsThisDay = config.cravings.filter(c => {
+          const cTime = new Date(c.time);
+          return cTime >= dayStart && cTime < dayEnd;
+        }).length;
+        
+        last7Days.push({
+          day: date.getDate(),
+          count: cravingsThisDay
+        });
+      }
+      
+      const maxCravings = Math.max(...last7Days.map(d => d.count), 1);
+      
+      container.innerHTML = last7Days.map(d => {
+        const intensity = d.count === 0 ? '' : d.count <= maxCravings / 3 ? 'low' : d.count <= maxCravings * 2 / 3 ? 'medium' : 'high';
+        return `<div class="craving-day ${intensity}">${d.day}</div>`;
+      }).join('');
+      
+      // Update insights
+      if (config.cravings.length > 0) {
+        const hourCounts = new Array(24).fill(0);
+        config.cravings.forEach(c => {
+          const hour = new Date(c.time).getHours();
+          hourCounts[hour]++;
+        });
+        const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
+        const peakTime = peakHour === 0 ? '12am' : peakHour < 12 ? peakHour + 'am' : peakHour === 12 ? '12pm' : (peakHour - 12) + 'pm';
+        
+        document.getElementById('cravingInsights').textContent = 
+          `You've logged ${config.cravings.length} cravings. Peak time: ${peakTime}. Most intense cravings happen in the first 2 weeks. You're doing great! 💪`;
+      }
+    }
+
+    // Personal insights
+    function updatePersonalInsights() {
+      const insights = [];
+      const avgDays = (getDaysSince(config.nicotineQuit) + getDaysSince(config.thcQuit)) / 2;
+      
+      if (avgDays < 14) {
+        insights.push("You're in the critical first two weeks. Every hour matters!");
+      }
+      
+      if (config.totalVisits > 5) {
+        insights.push(`You've checked the app ${config.totalVisits} times. Consistency is key!`);
+      }
+      
+      if (config.cravings.length > 0) {
+        const avgPerDay = config.cravings.length / Math.max(1, avgDays);
+        if (avgPerDay < 3) {
+          insights.push("Your cravings are below average intensity. Excellent control!");
+        }
+      }
+      
+      const nicWeeks = getDaysSince(config.nicotineQuit) / 7;
+      const thcWeeks = getDaysSince(config.thcQuit) / 7;
+      const saved = (nicWeeks * config.nicotineCostPerWeek) + (thcWeeks * config.thcCostPerWeek);
+      
+      if (saved > 50) {
+        insights.push(`You've saved $${saved.toFixed(0)}! Treat yourself to something nice. 🎉`);
+      }
+      
+      if (insights.length === 0) {
+        insights.push("Keep tracking your progress. Insights will appear as you build your recovery journey!");
+      }
+      
+      document.getElementById('personalInsights').innerHTML = insights.map(i => 
+        `<div style="margin-bottom: 12px;">• ${i}</div>`
+      ).join('');
+    }
+
+    // Achievements
+    function renderAchievements() {
+      const container = document.getElementById('achievementsGrid');
+      
+      container.innerHTML = achievements.map(a => {
+        const earned = a.condition();
+        return `
+          <div class="achievement-card ${earned ? 'earned' : 'locked'}">
+            <div class="achievement-icon">${a.icon}</div>
+            <div class="achievement-title">${a.title}</div>
+            <div class="achievement-desc">${a.desc}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Metric detail modal
+    function showMetricDetail(metric) {
+      const details = {
+        rhr: {
+          title: 'Resting Heart Rate',
+          value: document.getElementById('rhrCurrent').textContent + ' bpm',
+          label: 'Current RHR',
+          meaning: 'Your resting heart rate measures how efficiently your heart pumps blood when you\'re at rest. A lower RHR typically indicates better cardiovascular fitness.',
+          recovery: 'After quitting nicotine, your heart rate begins to normalize within hours. Nicotine is a stimulant that increases heart rate. As it leaves your system, your heart can work more efficiently with less strain.',
+          progress: 'You\'ve reduced your heart rate by ' + document.getElementById('rhrChange').textContent + ' bpm from your baseline. Your target is ' + TARGETS.rhr + ' bpm, which is considered excellent for cardiovascular health.'
+        },
+        vo2: {
+          title: 'VO₂ Max',
+          value: document.getElementById('vo2Current').textContent + ' mL/kg/min',
+          label: 'Cardio Fitness',
+          meaning: 'VO₂ Max measures the maximum amount of oxygen your body can use during intense exercise. It\'s the gold standard for aerobic fitness.',
+          recovery: 'Vaping reduces oxygen delivery to muscles. After quitting, your blood vessels dilate, circulation improves, and your cells become more efficient at using oxygen. You\'ll notice you can exercise harder and longer.',
+          progress: 'You\'ve improved by ' + document.getElementById('vo2Change').textContent + ' points. Your target is ' + TARGETS.vo2 + '+ mL/kg/min, which would put you in the "above average" fitness category.'
+        },
+        hrv: {
+          title: 'Heart Rate Variability',
+          value: document.getElementById('hrvCurrent').textContent + ' ms',
+          label: 'HRV',
+          meaning: 'HRV measures the variation in time between heartbeats. Higher HRV indicates better cardiovascular fitness, stress resilience, and recovery capacity.',
+          recovery: 'Nicotine disrupts your autonomic nervous system, reducing HRV. After quitting, your parasympathetic nervous system (rest & digest) strengthens, increasing the healthy variation in your heart rate.',
+          progress: 'You\'ve increased HRV by ' + document.getElementById('hrvChange').textContent + ' ms. Your target is ' + TARGETS.hrv + ' ms, which indicates excellent recovery and low stress levels.'
+        },
+        fev1: {
+          title: 'Lung Function (FEV₁)',
+          value: document.getElementById('fev1Current').textContent + '%',
+          label: 'Forced Expiratory Volume',
+          meaning: 'FEV₁ measures how much air you can forcefully exhale in one second. It\'s a key indicator of lung health and capacity.',
+          recovery: 'Vaping causes inflammation and damages cilia (tiny hairs that clean your lungs). After quitting, inflammation decreases rapidly, and cilia regrow over months. Your lungs can hold more air and clear mucus better.',
+          progress: 'You\'ve improved by ' + document.getElementById('fev1Change').textContent + ' percentage points. Your target is ' + TARGETS.fev1 + '%, which is considered normal healthy lung function.'
+        },
+        bp: {
+          title: 'Blood Pressure',
+          value: document.getElementById('bpCurrent').textContent + ' mmHg',
+          label: 'Blood Pressure',
+          meaning: 'Blood pressure measures the force of blood against artery walls. High blood pressure strains your heart and increases risk of heart disease and stroke.',
+          recovery: 'Nicotine constricts blood vessels, raising blood pressure. After quitting, your blood vessels relax and widen, reducing pressure. This happens relatively quickly - within weeks.',
+          progress: 'You\'ve reduced blood pressure by ' + document.getElementById('bpChange').textContent + ' points. Your target is ' + TARGETS.bp + '/80 mmHg, which is considered optimal blood pressure.'
+        },
+        spo2: {
+          title: 'Blood Oxygen (SpO₂)',
+          value: document.getElementById('spo2Current').textContent + '%',
+          label: 'Oxygen Saturation',
+          meaning: 'SpO₂ measures the percentage of oxygen-carrying hemoglobin in your blood. Normal levels are 95-100%. It indicates how well your lungs transfer oxygen to your blood.',
+          recovery: 'Vaping reduces oxygen absorption in lungs. After quitting, lung tissue heals, inflammation decreases, and oxygen can pass more easily from air to blood. This improves within days.',
+          progress: 'You\'ve improved by ' + document.getElementById('spo2Change').textContent + ' percentage points. Your target is ' + TARGETS.spo2 + '%, which is excellent oxygen saturation.'
+        }
+      };
+      
+      const d = details[metric];
+      document.getElementById('metricDetailTitle').textContent = d.title;
+      document.getElementById('metricDetailValue').textContent = d.value;
+      document.getElementById('metricDetailLabel').textContent = d.label;
+      document.getElementById('metricDetailMeaning').textContent = d.meaning;
+      document.getElementById('metricDetailRecovery').textContent = d.recovery;
+      document.getElementById('metricDetailProgress').textContent = d.progress;
+      
+      document.getElementById('metricDetailModal').classList.add('active');
+      haptic('light');
+    }
+
+    function closeMetricDetail() {
+      document.getElementById('metricDetailModal').classList.remove('active');
+    }
+
+    // Comparison mode
+    function updateComparison() {
+      const weeksEarlier = parseInt(document.getElementById('comparisonSlider').value);
+      const result = document.getElementById('comparisonResult');
+      
+      const currentDays = getDaysSince(config.nicotineQuit);
+      const hypotheticalDays = currentDays + (weeksEarlier * 7);
+      
+      const currentRHR = calculateRHR(currentDays);
+      const hypotheticalRHR = calculateRHR(hypotheticalDays);
+      const rhrDiff = currentRHR - hypotheticalRHR;
+      
+      if (weeksEarlier === 1) {
+        result.textContent = `If you had quit 1 week earlier, your heart rate would be ${Math.abs(Math.round(rhrDiff))} bpm lower right now.`;
+      } else {
+        result.textContent = `If you had quit ${weeksEarlier} weeks earlier, your heart rate would be ${Math.abs(Math.round(rhrDiff))} bpm lower right now.`;
+      }
+    }
+
+    // Data export/import
+    function exportData() {
+      const dataStr = JSON.stringify({
+        ...config,
+        nicotineQuit: config.nicotineQuit.toISOString(),
+        thcQuit: config.thcQuit.toISOString(),
+        lastVisit: config.lastVisit.toISOString(),
+        exportDate: new Date().toISOString(),
+        version: 2
+      }, null, 2);
+      
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `recovery-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      haptic('success');
+      alert('Data exported successfully! 📦');
+    }
+
+    function importData() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function handleImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          
+          if (confirm('This will overwrite your current data. Continue?')) {
+            config = {
+              ...config,
+              ...imported,
+              nicotineQuit: new Date(imported.nicotineQuit),
+              thcQuit: new Date(imported.thcQuit),
+              lastVisit: new Date(imported.lastVisit || new Date()),
+              cravings: imported.cravings || []
+            };
+            saveConfig();
+            init();
+            haptic('success');
+            alert('Data imported successfully! 📥');
+          }
+        } catch (err) {
+          alert('Error importing data. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Reset
+    function confirmReset() {
+      if (confirm('⚠️ This will permanently delete all your data. Are you absolutely sure?')) {
+        if (confirm('Last chance! This cannot be undone. Delete everything?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      }
+    }
+
+    // Settings modal (legacy)
+    function openSettings() {
+      // Now just switches to settings view
+      switchView('settings');
+    }
+
+    function closeSettings() {
+      // Legacy function, no longer needed
+    }
+
+    // Onboarding
+    let currentSlide = 0;
+    
+    function nextOnboardingSlide() {
+      const slides = document.getElementById('onboardingSlides');
+      const dots = document.querySelectorAll('.onboarding-dots .dot');
+      const btn = document.querySelector('.onboarding-btn');
+      
+      if (currentSlide < 2) {
+        currentSlide++;
+        slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === currentSlide);
+        });
+        
+        if (currentSlide === 2) {
+          btn.textContent = 'Get Started';
+          btn.onclick = finishOnboarding;
+        }
+      }
+      
+      haptic('light');
+    }
+
+    function skipOnboarding() {
+      finishOnboarding();
+    }
+
+    function finishOnboarding() {
+      localStorage.setItem(ONBOARDING_KEY, 'completed');
+      document.getElementById('onboarding').classList.remove('active');
+      haptic('success');
+    }
+
+    function checkOnboarding() {
+      const completed = localStorage.getItem(ONBOARDING_KEY);
+      if (!completed) {
+        document.getElementById('onboarding').classList.add('active');
+      }
+    }
+
+    // Pull to refresh
+    let pullStartY = 0;
+    let pullDistance = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      if (window.scrollY === 0) {
+        pullStartY = e.touches[0].clientY;
+      }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (pullStartY > 0) {
+        pullDistance = e.touches[0].clientY - pullStartY;
+        if (pullDistance > 0 && pullDistance < 100) {
+          document.getElementById('pullIndicator').classList.add('active');
+        }
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      if (pullDistance > 60) {
+        init();
+        haptic('medium');
+      }
+      document.getElementById('pullIndicator').classList.remove('active');
+      pullStartY = 0;
+      pullDistance = 0;
+    });
+
+    // Confetti effect
+    function showConfetti() {
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.background = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 4)];
+          confetti.style.animationDuration = (Math.random() * 2 + 1) + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 30);
+      }
+    }
+
+    // Check for milestone completion
+    function checkMilestoneCompletion() {
+      const now = new Date();
+      const completed = milestones.filter(m => {
+        const quit = m.substance === 'nicotine' ? config.nicotineQuit : config.thcQuit;
+        const time = new Date(quit.getTime() + m.min * 60000);
+        return time < now && time > config.lastVisit && m.major;
+      });
+
+      if (completed.length > 0 && config.totalVisits > 1) {
+        showConfetti();
+        haptic('success');
+      }
+    }
+
+    // Initialize
+    function init() {
+      loadConfig();
+      loadTheme();
+      checkOnboarding();
+      updateMetrics();
+      updateCounters();
+      updateQuickStats();
+      updateMotivationalMessage();
+      updateTimelines();
+      renderAchievements();
+      checkMilestoneCompletion();
+      
+      // Hide loading screen
+      setTimeout(() => {
+        document.getElementById('loadingScreen').classList.add('hidden');
+      }, 500);
+      
+      // Auto-save when settings inputs change
+      const settingsInputs = document.querySelectorAll('#settingsView input, #settingsView select');
+      settingsInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          saveSettingsFromView();
+        });
+      });
+      
+      // Update intervals
+      setInterval(updateCounters, 1000);
+      setInterval(() => {
+        updateMetrics();
+        updateQuickStats();
+        updateTimelines();
+      }, 10000);
+      
+      // Update motivational message every hour
+      setInterval(updateMotivationalMessage, 3600000);
+      
+      // Page visibility API - pause updates when hidden
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          init();
+        }
+      });
+    }
+
+    // Start app
+    init();
+  </script>
+</body>
+</html>
